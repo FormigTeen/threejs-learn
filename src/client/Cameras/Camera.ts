@@ -1,7 +1,8 @@
 import { PerspectiveCamera } from 'three'
 import * as THREE from 'three'
+import { IHasProvider } from '../Interfaces/IHasProvider'
 
-export default class Camera {
+export default class Camera implements IHasProvider<PerspectiveCamera>{
     protected _provider: PerspectiveCamera;
 
     public constructor() {

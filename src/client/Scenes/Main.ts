@@ -1,6 +1,7 @@
 import  { Scene } from 'three'
+import { IHasProvider } from '../Interfaces/IHasProvider'
 
-export default class Main {
+export default class Main implements IHasProvider<Scene> {
 
     protected _provider: Scene;
 

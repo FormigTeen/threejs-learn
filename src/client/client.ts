@@ -2,15 +2,17 @@ import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import Main from './Scenes/Main'
 import Camera from './Cameras/Camera'
+import Application from './Application'
+import Menu from './Objects/Menu'
+import Ground from './Objects/Ground/Ground'
 
-const scene = (new Main()).getProvider()
+const sceneProvider = new Main();
+const scene = sceneProvider.getProvider()
+const menuProvider = new Menu();
 
-const cameraProvider = new Camera();
-const camera = cameraProvider.getProvider()
 
-const renderer = new THREE.WebGLRenderer()
-renderer.setSize(window.innerWidth, window.innerHeight)
-document.body.appendChild(renderer.domElement)
+const renderer = new Application()
+renderer.setCamera(new Camera()).setScene(sceneProvider)
 
 const geometry = new THREE.BoxGeometry()
 const material = new THREE.MeshBasicMaterial({
@@ -18,26 +20,13 @@ const material = new THREE.MeshBasicMaterial({
     wireframe: true,
 })
 
-const cube = new THREE.Mesh(geometry, material)
-scene.add(cube)
+const ground = new Ground();
+scene.add(ground.getProvider())
 
-window.addEventListener('resize', onWindowResize, false)
-function onWindowResize() {
-    renderer.setSize(window.innerWidth, window.innerHeight)
-    render()
-}
 
 function animate() {
     requestAnimationFrame(animate)
-
-    cube.rotation.x += 0.01
-    cube.rotation.y += 0.01
-
-    render()
-}
-
-function render() {
-    renderer.render(scene, camera)
+    renderer.onRender()
 }
 
 animate()
