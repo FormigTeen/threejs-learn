@@ -15,5 +15,7 @@ const renderer = new Application()
 renderer.setCamera(new Camera()).setScene(sceneProvider)
 
 const ground = new Ground();
+ground.onMenu(menuProvider)
 scene.add(ground.getProvider())
 renderer.registerUpdate(ground)
+renderer.onBoot()

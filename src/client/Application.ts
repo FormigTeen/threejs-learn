@@ -3,6 +3,11 @@ import * as THREE from 'three'
 import { IHasProvider } from './Interfaces/IHasProvider'
 import { IHasUpdate } from './Interfaces/IHasUpdate'
 
+interface ConfigUpdate {
+    getApplication(): Application,
+    getClock: number
+}
+
 export default class Application {
 
     protected _provider: WebGLRenderer;
@@ -16,12 +21,15 @@ export default class Application {
         this._provider.setSize(window.innerWidth, window.innerHeight)
         document.body.appendChild(this._provider.domElement)
         window.addEventListener('resize', () => this.onResize(), false)
-        this.onAnimate()
     }
 
-    onAnimate() {
-        requestAnimationFrame(this.onAnimate)
-        this.onUpdate()
+    onBoot() {
+        this.onRender()
+        requestAnimationFrame((_) => this.onAnimate(_))
+    }
+    onAnimate(clock: number) {
+        this.onUpdate(clock)
+        requestAnimationFrame((_) => this.onAnimate(_))
     }
     onResize() {
         this._provider.setSize(window.innerWidth, window.innerHeight)
@@ -53,18 +61,18 @@ export default class Application {
         const key = aObject.getUuid()
         this._updatesStack = {
             ...this._updatesStack,
-            [key]: aObject.onUpdate
+            [key]: () => aObject.onUpdate()
         }
         return this;
     }
 
-    onUpdate() {
+    onUpdate(aClock: number) {
         Object.keys(this._updatesStack)
             .map(_ => this._updatesStack[_])
-            .map(_ => _());
-        if ( this._scene ) {
-            this._scene.getProvider().clear()
-        }
+            .map(_ => _({
+                getApplication: () => this,
+                getClock: () => aClock
+            }));
         this.onRender()
     }
 
