@@ -14,19 +14,6 @@ const menuProvider = new Menu();
 const renderer = new Application()
 renderer.setCamera(new Camera()).setScene(sceneProvider)
 
-const geometry = new THREE.BoxGeometry()
-const material = new THREE.MeshBasicMaterial({
-    color: 0x00ff00,
-    wireframe: true,
-})
-
 const ground = new Ground();
 scene.add(ground.getProvider())
-
-
-function animate() {
-    requestAnimationFrame(animate)
-    renderer.onRender()
-}
-
-animate()
+renderer.registerUpdate(ground)
