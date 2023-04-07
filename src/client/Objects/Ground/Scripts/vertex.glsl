@@ -1,12 +1,14 @@
 uniform float uAmp;
 
-varying vec3 vColor;
+varying vec3 aVertex;
+
+varying float z;
 
 void main(void) {
 
-    float z = uAmp * sin(position.x*0.2) * cos(position.y*0.5);
+    z = uAmp * sin(position.x*0.2) * cos(position.y*0.5);
 
-	vColor = vec3(1.0, 1.0, 0.0);
+	aVertex = vec3(1.0, 1.0, 0.0);
 
 	gl_Position = projectionMatrix * modelViewMatrix * vec4(position.x, position.y, z, 1.0);
 

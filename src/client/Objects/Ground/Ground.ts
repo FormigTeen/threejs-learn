@@ -1,10 +1,13 @@
 import { AxesHelper, DoubleSide, Mesh, PlaneGeometry, ShaderMaterial } from 'three'
-import VertexScript from './Scripts/vertex.sdx'
-import FragmentScript from './Scripts/fragment.sdx'
+import VertexScript from './Scripts/vertex.glsl'
+import GradientFragmentScript from './Scripts/gradientFragment.glsl'
+import FragmentScript from './Scripts/fragment.glsl'
+import IrregularVertexScript from './Scripts/irregularVertex.glsl'
 import { IHasProvider } from '../../Interfaces/IHasProvider'
 import { IHasUpdate } from '../../Interfaces/IHasUpdate'
 import IHasMenu from '../../Interfaces/IHasMenu'
 import Menu from '../Menu'
+import { IUniforms } from '../../Interfaces/IUniforms'
 export default class Ground implements IHasProvider<Mesh>, IHasUpdate, IHasMenu {
 
     protected _material: ShaderMaterial;
@@ -13,16 +16,18 @@ export default class Ground implements IHasProvider<Mesh>, IHasUpdate, IHasMenu 
     protected _axes: AxesHelper;
 
     protected _controls = {
-        Amplitude 	: 1.0
+        Amplitude: 1.0,
+        Segmentos: 50,
+        "Modo Malha": true,
+        "Modo Irregular": false,
+        "Modo Gradiente": false,
+        'Altura Gradiente': 10.0,
+        'Centro Gradiente': 0.0
     }
 
     constructor() {
         this._material = this.getMaterial()
-        this._geometry = new PlaneGeometry(
-            100,
-            100,
-            30, 30
-        )
+        this._geometry = this.getGeometry();
         this._provider = new Mesh(this._geometry, this._material)
         this._provider.rotateX(-90.0 * Math.PI / 180.0);
 
@@ -32,20 +37,37 @@ export default class Ground implements IHasProvider<Mesh>, IHasUpdate, IHasMenu 
         this._provider.add(this._axes)
     }
 
+    protected getGeometry()
+    {
+        return new PlaneGeometry(
+            100,
+            100,
+            Math.round(this._controls.Segmentos), Math.round(this._controls.Segmentos)
+        )
+    }
+
     protected getMaterial()
     {
-        const uAmp = {
-            type: 'f',
-            value: this._controls.Amplitude
-        };
+        const uniforms: IUniforms = {
+            uAmp: {
+                type: 'f',
+                value: this._controls.Amplitude
+            },
+            fHeight: {
+                type: 'f',
+                value: this._controls['Altura Gradiente']
+            },
+            fCenter: {
+                type: 'f',
+                value: this._controls['Centro Gradiente']
+            }
+        }
         return new ShaderMaterial(
             {
-                uniforms: {
-                    uAmp: uAmp
-                },
-                vertexShader: VertexScript,
-                fragmentShader: FragmentScript,
-                wireframe: true,
+                uniforms: uniforms,
+                vertexShader: this._controls['Modo Irregular'] ? IrregularVertexScript: VertexScript,
+                fragmentShader: this._controls['Modo Gradiente'] ? GradientFragmentScript : FragmentScript,
+                wireframe: this._controls['Modo Malha'],
                 side: DoubleSide
             }
         );
@@ -69,11 +91,35 @@ export default class Ground implements IHasProvider<Mesh>, IHasUpdate, IHasMenu 
         aMenu.getProvider().add(this._controls, 'Amplitude', 0.1, 20.0).onChange(
             () => this.onChange()
         )
+        aMenu.getProvider().add(this._controls, 'Segmentos', 50, 1000).onChange(
+            () => this.onChange()
+        )
+
+        aMenu.getProvider().add(this._controls, 'Modo Malha').onChange(
+            () => this.onChange()
+        )
+
+        aMenu.getProvider().add(this._controls, 'Modo Gradiente').onChange(
+            () => this.onChange()
+        )
+
+        aMenu.getProvider().add(this._controls, 'Modo Irregular').onChange(
+            () => this.onChange()
+        )
+
+        aMenu.getProvider().add(this._controls, 'Altura Gradiente', 1, 20).onChange(
+            () => this.onChange()
+        )
+
+        aMenu.getProvider().add(this._controls, 'Centro Gradiente', -10, 10).onChange(
+            () => this.onChange()
+        )
         return aMenu;
     }
 
     onChange() {
         this._provider.material = this.getMaterial()
+        this._provider.geometry = this.getGeometry()
     }
 
 }

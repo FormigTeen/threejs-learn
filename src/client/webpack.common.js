@@ -10,7 +10,7 @@ module.exports = {
                 exclude: /node_modules/,
             },
             {
-                test: /\.sdx$/,
+                test: /\.glsl$/,
                 use: 'raw-loader',
                 exclude: /node_modules/,
             },
