@@ -3,11 +3,11 @@ import VertexScript from './Scripts/vertex.glsl'
 import GradientFragmentScript from './Scripts/gradientFragment.glsl'
 import FragmentScript from './Scripts/fragment.glsl'
 import IrregularVertexScript from './Scripts/irregularVertex.glsl'
-import { IHasProvider } from '../../Interfaces/IHasProvider'
-import { IHasUpdate } from '../../Interfaces/IHasUpdate'
-import IHasMenu from '../../Interfaces/IHasMenu'
-import Menu from '../Menu'
-import { IUniforms } from '../../Interfaces/IUniforms'
+import { IHasProvider } from '../../../../Interfaces/IHasProvider'
+import { IHasUpdate } from '../../../../Interfaces/IHasUpdate'
+import IHasMenu from '../../../../Interfaces/IHasMenu'
+import MainSceneMenu from '../MainSceneMenu'
+import { IUniforms } from '../../../../Interfaces/IUniforms'
 export default class Ground implements IHasProvider<Mesh>, IHasUpdate, IHasMenu {
 
     protected _material: ShaderMaterial;
@@ -87,7 +87,7 @@ export default class Ground implements IHasProvider<Mesh>, IHasUpdate, IHasMenu 
         return this._provider.uuid
     }
 
-    onMenu(aMenu: Menu): Menu {
+    onMenu(aMenu: MainSceneMenu): MainSceneMenu {
         aMenu.getProvider().add(this._controls, 'Amplitude', 0.1, 20.0).onChange(
             () => this.onChange()
         )

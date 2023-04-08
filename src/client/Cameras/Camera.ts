@@ -2,7 +2,8 @@ import { PerspectiveCamera } from 'three'
 import * as THREE from 'three'
 import { IHasProvider } from '../Interfaces/IHasProvider'
 import IHasMenu from '../Interfaces/IHasMenu'
-import Menu from '../Objects/Menu'
+import MainSceneMenu from '../Scenes/GroundScene/Objects/MainSceneMenu'
+import { GUI } from 'lil-gui'
 
 export default class Camera implements IHasProvider<PerspectiveCamera>, IHasMenu {
     protected _provider: PerspectiveCamera;
@@ -33,7 +34,7 @@ export default class Camera implements IHasProvider<PerspectiveCamera>, IHasMenu
         this._provider.position.z = this._controls.Distancia
     }
 
-    onMenu(aMenu: Menu): Menu {
+    onMenu(aMenu: IHasProvider<GUI>): IHasProvider<GUI> {
         aMenu.getProvider().add(this._controls, 'Distancia', 0, 100).onChange(() => this.onUpdate())
         return aMenu;
     }

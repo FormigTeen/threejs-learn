@@ -1,24 +1,25 @@
-import * as THREE from 'three'
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
-import Main from './Scenes/Main'
+import GroundScene from './Scenes/GroundScene/GroundScene'
 import Camera from './Cameras/Camera'
 import Application from './Application'
 import Menu from './Objects/Menu'
-import Ground from './Objects/Ground/Ground'
-import { cameraNormalMatrix } from 'three/examples/jsm/nodes/shadernode/ShaderNodeBaseElements'
+import ScenesMenu from './Objects/ScenesMenu'
+import TableScene from './Scenes/TableScene'
 
-const sceneProvider = new Main();
-const scene = sceneProvider.getProvider()
-const menuProvider = new Menu();
+const mainMenu = new Menu();
 
+const mainScene = (new GroundScene());
+mainScene.onMenu(mainMenu);
+const tableScene = new TableScene();
 
-const renderer = new Application()
+const scenesMenu =new ScenesMenu(mainMenu);
+
+const app = new Application()
 const camera = new Camera()
-renderer.setCamera(camera).setScene(sceneProvider)
+app.setCamera(camera).addScene(mainScene).addScene(tableScene)
+app.onMenu(scenesMenu)
 
-const ground = new Ground();
-ground.onMenu(menuProvider)
-camera.onMenu(menuProvider)
-scene.add(ground.getProvider())
-renderer.registerUpdate(ground)
-renderer.onBoot()
+camera.onMenu(mainMenu)
+
+app.registerUpdate(mainScene)
+
+app.onBoot()
