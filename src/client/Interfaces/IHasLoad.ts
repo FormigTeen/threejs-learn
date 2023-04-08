@@ -1,4 +1,4 @@
 export interface IHasLoad {
-    onLoad(): IHasLoad;
-    onUnload(): IHasLoad;
+    onLoad(aLoader: unknown): IHasLoad;
+    onUnload(aLoader: unknown): IHasLoad;
 }

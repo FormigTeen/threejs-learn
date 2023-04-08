@@ -1,8 +1,8 @@
 import { PerspectiveCamera } from 'three'
 import * as THREE from 'three'
-import { IHasProvider } from '../Interfaces/IHasProvider'
-import IHasMenu from '../Interfaces/IHasMenu'
-import MainSceneMenu from '../Scenes/GroundScene/Objects/MainSceneMenu'
+import { IHasProvider } from '../../../Interfaces/IHasProvider'
+import IHasMenu from '../../../Interfaces/IHasMenu'
+import MainSceneMenu from './MainSceneMenu'
 import { GUI } from 'lil-gui'
 
 export default class Camera implements IHasProvider<PerspectiveCamera>, IHasMenu {

@@ -1,4 +1,4 @@
-import { PerspectiveCamera, Scene, WebGLRenderer } from 'three'
+import { OrthographicCamera, PerspectiveCamera, Scene, WebGLRenderer } from 'three'
 import * as THREE from 'three'
 import { IHasProvider } from './Interfaces/IHasProvider'
 import { IHasUpdate } from './Interfaces/IHasUpdate'
@@ -24,7 +24,7 @@ export default class Application implements IHasMenu {
         "BackupCena": ""
     }
 
-    protected _camera?: IHasProvider<PerspectiveCamera>
+    protected _camera?: IHasProvider<PerspectiveCamera> | IHasProvider<OrthographicCamera>
 
     protected _updatesStack: Record<string, Function> = {};
 
@@ -61,7 +61,7 @@ export default class Application implements IHasMenu {
         return this;
     }
 
-    setCamera(aCamera: IHasProvider<PerspectiveCamera>) {
+    setCamera(aCamera: IHasProvider<PerspectiveCamera> | IHasProvider<OrthographicCamera>) {
         this._camera = aCamera;
         return this;
     }
@@ -110,9 +110,9 @@ export default class Application implements IHasMenu {
 
     public onChangeScene()
     {
-        this._scenes.find(_ => _.getProvider().name === this._controls['BackupCena'])?.onUnload()
+        this._scenes.find(_ => _.getProvider().name === this._controls['BackupCena'])?.onUnload(this)
         this._controls.BackupCena = this._controls.Cena;
-        this._scenes.find(_ => _.getProvider().name === this._controls['Cena'])?.onLoad()
+        this._scenes.find(_ => _.getProvider().name === this._controls['Cena'])?.onLoad(this)
     }
 
 

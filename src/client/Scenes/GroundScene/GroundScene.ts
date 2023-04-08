@@ -5,13 +5,15 @@ import MainSceneMenu from './Objects/MainSceneMenu'
 import { GUI } from 'lil-gui'
 import Ground from './Objects/Ground/Ground'
 import { IHasUpdate } from '../../Interfaces/IHasUpdate'
-import { IHasLoad } from '../../Interfaces/IHasLoad'
 import IScene from '../../Interfaces/IScene'
+import Application from '../../Application'
+import Camera from './Objects/Camera'
 
 export default class GroundScene implements IScene, IHasMenu, IHasUpdate {
 
     protected _provider: Scene;
     protected _menu?: MainSceneMenu;
+    protected _camera: Camera;
 
     protected _ground: Ground;
 
@@ -19,6 +21,7 @@ export default class GroundScene implements IScene, IHasMenu, IHasUpdate {
 
         this._provider = new Scene();
         this._provider.name = "Malha";
+        this._camera = new Camera()
 
 
         this._ground = new Ground();
@@ -34,6 +37,7 @@ export default class GroundScene implements IScene, IHasMenu, IHasUpdate {
         if ( !this._menu ) {
             this._menu = new MainSceneMenu(aMenu);
             this._ground.onMenu(this._menu)
+            this._camera.onMenu(this._menu)
         }
         return this._menu;
     }
@@ -51,8 +55,10 @@ export default class GroundScene implements IScene, IHasMenu, IHasUpdate {
         return this;
     }
 
-    onLoad() {
+    onLoad(aLoader: unknown) {
         this._menu?.getProvider().show();
+        if ( aLoader instanceof Application )
+            aLoader.setCamera(this._camera)
         return this;
     }
 

@@ -10,7 +10,7 @@ export default class MainSceneMenu implements IHasProvider<GUI> {
     protected _title: string = "Malha";
     constructor(aMenu: IHasProvider<GUI>) {
         this._provider = aMenu.getProvider().addFolder(this._title)
-        this._provider.hide();
+        this._provider.open();
     }
 
     getProvider() {
