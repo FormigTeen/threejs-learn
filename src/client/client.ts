@@ -8,8 +8,11 @@ import TableScene from './Scenes/TableScene/TableScene'
 const mainMenu = new Menu();
 
 const mainScene = (new GroundScene());
-mainScene.onMenu(mainMenu);
 const tableScene = new TableScene();
+
+mainScene.onMenu(mainMenu);
+tableScene.onMenu(mainMenu);
+
 
 const scenesMenu =new ScenesMenu(mainMenu);
 

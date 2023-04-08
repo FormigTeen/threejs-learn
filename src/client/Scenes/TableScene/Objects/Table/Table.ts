@@ -4,7 +4,7 @@ import FragmentScript from './Scripts/fragment.glsl'
 import { IHasProvider } from '../../../../Interfaces/IHasProvider'
 import { IHasUpdate } from '../../../../Interfaces/IHasUpdate'
 import IHasMenu from '../../../../Interfaces/IHasMenu'
-import MainSceneMenu from '../MainSceneMenu'
+import Menu from '../Menu'
 import { IUniforms } from '../../../../Interfaces/IUniforms'
 export default class Table implements IHasProvider<Mesh>, IHasUpdate, IHasMenu {
 
@@ -13,7 +13,7 @@ export default class Table implements IHasProvider<Mesh>, IHasUpdate, IHasMenu {
     protected _provider: Mesh;
 
     protected _controls = {
-        Raio: 1.5,
+        Raio: 2.5,
     }
 
     constructor() {
@@ -64,8 +64,8 @@ export default class Table implements IHasProvider<Mesh>, IHasUpdate, IHasMenu {
         return this._provider.uuid
     }
 
-    onMenu(aMenu: MainSceneMenu): MainSceneMenu {
-        aMenu.getProvider().add(this._controls, 'Raio', 0.1, 20.0).onChange(
+    onMenu(aMenu: Menu): Menu {
+        aMenu.getProvider().add(this._controls, 'Raio', 0.1, 5.0).onChange(
             () => this.onChange()
         )
 
