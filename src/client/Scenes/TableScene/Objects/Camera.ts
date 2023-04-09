@@ -7,11 +7,11 @@ import { GUI } from 'lil-gui'
 export default class Camera implements IHasProvider<OrthographicCamera>, IHasMenu {
     protected _provider: OrthographicCamera;
 
+    protected _size = 10.0;
 
     public constructor() {
         const aspect = window.innerWidth / window.innerHeight;
-        const size = 10.0;
-        this._provider = new OrthographicCamera( size * aspect / -2.0, size * aspect / 2.0, size / 2.0, size / -2.0, -1.0, 1.0);
+        this._provider = new OrthographicCamera( this._size * aspect / -2.0, this._size * aspect / 2.0, this._size / 2.0, this._size / -2.0, -1.0, 1.0);
         this._provider.updateProjectionMatrix();
         window.addEventListener('resize', () => this.onResize(), false)
     }
@@ -26,6 +26,10 @@ export default class Camera implements IHasProvider<OrthographicCamera>, IHasMen
     }
 
     onUpdate() {
+        const aspect = window.innerWidth / window.innerHeight;
+        this._provider.left = this._size * aspect / -2.0;
+        this._provider.right = this._size * aspect / 2.0;
+        this._provider.updateProjectionMatrix();
     }
 
     onMenu(aMenu: IHasProvider<GUI>): IHasProvider<GUI> {

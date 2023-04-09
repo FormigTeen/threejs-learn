@@ -1,6 +1,7 @@
-import { AxesHelper, DoubleSide, Mesh, PlaneGeometry, ShaderMaterial } from 'three'
+import { AxesHelper, DoubleSide, Mesh, PlaneGeometry, ShaderMaterial, Vector2 } from 'three'
 import VertexScript from './Scripts/vertex.glsl'
-import FragmentScript from './Scripts/fragment.glsl'
+import CircleFragment from './Scripts/circle.glsl'
+import SquareFragment from './Scripts/square.glsl'
 import { IHasProvider } from '../../../../Interfaces/IHasProvider'
 import { IHasUpdate } from '../../../../Interfaces/IHasUpdate'
 import IHasMenu from '../../../../Interfaces/IHasMenu'
@@ -14,7 +15,14 @@ export default class Table implements IHasProvider<Mesh>, IHasUpdate, IHasMenu {
 
     protected _controls = {
         Raio: 2.5,
+        Potencia: 1,
+        Modo: 'Circulo'
     }
+
+    protected _modes: Record<string, string> = {
+        'Circulo': CircleFragment,
+        'Quadrado': SquareFragment
+    };
 
     constructor() {
         this._material = this.getMaterial()
@@ -32,19 +40,28 @@ export default class Table implements IHasProvider<Mesh>, IHasUpdate, IHasMenu {
         )
     }
 
+    protected getCenters()
+    {
+        return [...Array(Math.pow(2, this._controls.Potencia))]
+            .keys()
+    }
     protected getMaterial()
     {
         const uniforms: IUniforms = {
             uRaio: {
                 type: 'f',
-                value: this._controls.Raio
+                value: this._controls.Raio / (this._controls.Potencia)
             },
+            iPotencia: {
+                type: 'f',
+                value: this._controls.Potencia
+            }
         }
         return new ShaderMaterial(
             {
                 uniforms: uniforms,
                 vertexShader: VertexScript,
-                fragmentShader: FragmentScript,
+                fragmentShader: this._modes[this._controls.Modo],
                 side: DoubleSide
             }
         );
@@ -68,8 +85,10 @@ export default class Table implements IHasProvider<Mesh>, IHasUpdate, IHasMenu {
         aMenu.getProvider().add(this._controls, 'Raio', 0.1, 5.0).onChange(
             () => this.onChange()
         )
-
-
+        aMenu.getProvider().add(this._controls, 'Modo', Object.keys(this._modes)).onChange(
+            () => this.onChange()
+        )
+        aMenu.getProvider().add(this._controls, 'Potencia', [...Array(16).keys()].map(_ => _ + 1)).onChange( () => this.onChange())
         return aMenu;
     }
 

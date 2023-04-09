@@ -1,6 +1,6 @@
-varying vec2 vXY;
+varying vec2 aVertex;
 
 void main(void) {
-	vXY = position.xy;
+	aVertex = position.xy;
 	gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
 }
