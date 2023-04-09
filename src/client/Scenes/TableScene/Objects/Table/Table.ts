@@ -7,6 +7,12 @@ import { IHasUpdate } from '../../../../Interfaces/IHasUpdate'
 import IHasMenu from '../../../../Interfaces/IHasMenu'
 import Menu from '../Menu'
 import { IUniforms } from '../../../../Interfaces/IUniforms'
+
+interface IVertexConfig {
+    aVertex: Vector2;
+    isActive: boolean;
+}
+
 export default class Table implements IHasProvider<Mesh>, IHasUpdate, IHasMenu {
 
     protected _material: ShaderMaterial;
@@ -40,21 +46,23 @@ export default class Table implements IHasProvider<Mesh>, IHasUpdate, IHasMenu {
         )
     }
 
-    protected getCenters()
-    {
-        return [...Array(Math.pow(2, this._controls.Potencia))]
-            .keys()
-    }
     protected getMaterial()
     {
+        const centers = this.getCenters();
         const uniforms: IUniforms = {
             uRaio: {
                 type: 'f',
-                value: this._controls.Raio / (this._controls.Potencia)
+                value: this.getRaio()
             },
             iPotencia: {
                 type: 'f',
                 value: this._controls.Potencia
+            },
+            aCenters: {
+                value: [
+                    ...centers,
+                    ...[...Array(16 * 16 - centers.length).keys()].map(() => ({ aVertex: new Vector2(), isActive: false }))
+                ]
             }
         }
         return new ShaderMaterial(
@@ -95,6 +103,74 @@ export default class Table implements IHasProvider<Mesh>, IHasUpdate, IHasMenu {
     onChange() {
         this._provider.material = this.getMaterial()
         this._provider.geometry = this.getGeometry()
+    }
+    
+    public getRaio() {
+        return this._controls.Raio / this._controls.Potencia 
+    }
+
+    public getCenters(): IVertexConfig[] {
+
+        const centers: IVertexConfig[] = [];
+        const offSetCircle = this.getRaio() * 2.0;
+
+        let offsetIsPair = 0;
+        if (this._controls['Potencia'] % 2 == 0) {
+            offsetIsPair = this.getRaio();
+        } else {
+            const offsetIsPair = 0;
+        }
+
+        for (let aPhaseX = 0; aPhaseX < Math.floor(this._controls.Potencia / 2) ; aPhaseX++) {
+            if (this._controls.Potencia % 2 == 1) {
+                centers.push({
+                    aVertex: new Vector2(offSetCircle * (aPhaseX + 1) - offsetIsPair, 0),
+                    isActive: (aPhaseX + 1) % 2 == 1
+                })
+                centers.push({
+                    aVertex: new Vector2(-offSetCircle * (aPhaseX + 1) + offsetIsPair, 0),
+                    isActive: (aPhaseX + 1) % 2 == 1
+                })
+                centers.push({
+                    aVertex: new Vector2(0, -offSetCircle * (aPhaseX + 1) + offsetIsPair),
+                    isActive: (aPhaseX + 1) % 2 == 1
+                })
+
+                centers.push({
+                    aVertex: new Vector2(0, offSetCircle * (aPhaseX + 1) - offsetIsPair),
+                    isActive: (aPhaseX + 1) % 2 == 1
+                })
+            }
+
+            for (let aPhaseY = 0; aPhaseY < Math.floor(this._controls.Potencia / 2) ; aPhaseY++) {
+                centers.push({
+                    aVertex: new Vector2(offSetCircle * (aPhaseX + 1) - offsetIsPair, offSetCircle * (aPhaseY + 1) - offsetIsPair),
+                    isActive: (aPhaseX + 1 + aPhaseY + 1) % 2 == 0
+                })
+
+                centers.push({
+                    aVertex: new Vector2(offSetCircle * (aPhaseX + 1) - offsetIsPair, -offSetCircle * (aPhaseY + 1) + offsetIsPair),
+                    isActive: (aPhaseX + 1 + aPhaseY + 1) % 2 == 0
+                })
+                centers.push({
+                    aVertex: new Vector2(-offSetCircle * (aPhaseX + 1) + offsetIsPair, -offSetCircle * (aPhaseY + 1) + offsetIsPair),
+                    isActive: (aPhaseX + 1 + aPhaseY + 1) % 2 == 0
+                })
+                centers.push({
+                    aVertex: new Vector2(-offSetCircle * (aPhaseX + 1) + offsetIsPair, offSetCircle * (aPhaseY + 1) - offsetIsPair),
+                    isActive: (aPhaseX + 1 + aPhaseY + 1) % 2 == 0
+                })
+            }
+        }
+
+        if (this._controls.Potencia % 2 == 1) {
+            centers.push({
+                aVertex: new Vector2(0, 0),
+                    isActive: true
+            })
+        }
+
+        return centers;
     }
 
 }
