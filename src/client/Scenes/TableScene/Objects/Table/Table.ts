@@ -114,6 +114,8 @@ export default class Table implements IHasProvider<Mesh>, IHasUpdate, IHasMenu {
         const centers: IVertexConfig[] = [];
         const offSetCircle = this.getRaio() * 2.0;
 
+        const modePair = this._controls.Potencia % 2;
+
         let offsetIsPair = 0;
         if (this._controls['Potencia'] % 2 == 0) {
             offsetIsPair = this.getRaio();
@@ -122,18 +124,18 @@ export default class Table implements IHasProvider<Mesh>, IHasUpdate, IHasMenu {
         }
 
         for (let aPhaseX = 0; aPhaseX < Math.floor(this._controls.Potencia / 2) ; aPhaseX++) {
-            if (this._controls.Potencia % 2 == 1) {
+            if (modePair == 1) {
                 centers.push({
                     aVertex: new Vector2(offSetCircle * (aPhaseX + 1) - offsetIsPair, 0),
-                    isActive: (aPhaseX + 1) % 2 == 1
+                    isActive: (aPhaseX + 1) % 2 == modePair
                 })
                 centers.push({
                     aVertex: new Vector2(-offSetCircle * (aPhaseX + 1) + offsetIsPair, 0),
-                    isActive: (aPhaseX + 1) % 2 == 1
+                    isActive: (aPhaseX + 1) % 2 == modePair
                 })
                 centers.push({
                     aVertex: new Vector2(0, -offSetCircle * (aPhaseX + 1) + offsetIsPair),
-                    isActive: (aPhaseX + 1) % 2 == 1
+                    isActive: (aPhaseX + 1) % 2 == modePair
                 })
 
                 centers.push({
@@ -145,16 +147,16 @@ export default class Table implements IHasProvider<Mesh>, IHasUpdate, IHasMenu {
             for (let aPhaseY = 0; aPhaseY < Math.floor(this._controls.Potencia / 2) ; aPhaseY++) {
                 centers.push({
                     aVertex: new Vector2(offSetCircle * (aPhaseX + 1) - offsetIsPair, offSetCircle * (aPhaseY + 1) - offsetIsPair),
-                    isActive: (aPhaseX + 1 + aPhaseY + 1) % 2 == 0
+                    isActive: (aPhaseX + 1 + aPhaseY + 1) % 2 == modePair
                 })
 
                 centers.push({
                     aVertex: new Vector2(offSetCircle * (aPhaseX + 1) - offsetIsPair, -offSetCircle * (aPhaseY + 1) + offsetIsPair),
-                    isActive: (aPhaseX + 1 + aPhaseY + 1) % 2 == 0
+                    isActive: (aPhaseX + 1 + aPhaseY + 1) % 2 == modePair
                 })
                 centers.push({
                     aVertex: new Vector2(-offSetCircle * (aPhaseX + 1) + offsetIsPair, -offSetCircle * (aPhaseY + 1) + offsetIsPair),
-                    isActive: (aPhaseX + 1 + aPhaseY + 1) % 2 == 0
+                    isActive: (aPhaseX + 1 + aPhaseY + 1) % 2 == modePair
                 })
                 centers.push({
                     aVertex: new Vector2(-offSetCircle * (aPhaseX + 1) + offsetIsPair, offSetCircle * (aPhaseY + 1) - offsetIsPair),
