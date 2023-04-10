@@ -3,6 +3,7 @@ precision mediump float;
 
 struct Center {
 	vec2 aVertex;
+	bool isActive;
 };
 
 uniform float uRaio;
@@ -16,10 +17,12 @@ bool findArea(vec2 aVertex) {
 	float xPosition = 0.0;
 	float yPosition = 0.0;
 	for ( int itemIndex = 0 ; itemIndex < int(iPotencia) * int(iPotencia) ; itemIndex++ ){
-		xPosition = aVertex.x - aCenters[itemIndex].aVertex.x;
-		yPosition = aVertex.y - aCenters[itemIndex].aVertex.y;
-		if ( (uRaio > abs(xPosition)) && (uRaio > abs(yPosition)) )
-			return true;
+		if (aCenters[itemIndex].isActive) {
+			xPosition = aVertex.x - aCenters[itemIndex].aVertex.x;
+			yPosition = aVertex.y - aCenters[itemIndex].aVertex.y;
+			if ((uRaio > abs(xPosition)) && (uRaio > abs(yPosition)))
+				return true;
+		}
 	}
 	return false;
 }

@@ -13,6 +13,8 @@ interface IVertexConfig {
     isActive: boolean;
 }
 
+const LIMIT_POW = 16
+
 export default class Table implements IHasProvider<Mesh>, IHasUpdate, IHasMenu {
 
     protected _material: ShaderMaterial;
@@ -22,7 +24,8 @@ export default class Table implements IHasProvider<Mesh>, IHasUpdate, IHasMenu {
     protected _controls = {
         Raio: 2.5,
         Potencia: 1,
-        Modo: 'Circulo'
+        Modo: 'Circulo',
+        'Modo Tabuleiro': false
     }
 
     protected _modes: Record<string, string> = {
@@ -61,7 +64,7 @@ export default class Table implements IHasProvider<Mesh>, IHasUpdate, IHasMenu {
             aCenters: {
                 value: [
                     ...centers,
-                    ...[...Array(16 * 16 - centers.length).keys()].map(() => ({ aVertex: new Vector2(), isActive: false }))
+                    ...[...Array(LIMIT_POW * LIMIT_POW - centers.length).keys()].map(() => ({ aVertex: new Vector2(), isActive: false }))
                 ]
             }
         }
@@ -96,7 +99,10 @@ export default class Table implements IHasProvider<Mesh>, IHasUpdate, IHasMenu {
         aMenu.getProvider().add(this._controls, 'Modo', Object.keys(this._modes)).onChange(
             () => this.onChange()
         )
-        aMenu.getProvider().add(this._controls, 'Potencia', [...Array(16).keys()].map(_ => _ + 1)).onChange( () => this.onChange())
+        aMenu.getProvider().add(this._controls, 'Modo Tabuleiro').onChange(
+            () => this.onChange()
+        )
+        aMenu.getProvider().add(this._controls, 'Potencia', [...Array(LIMIT_POW).keys()].map(_ => _ + 1)).onChange( () => this.onChange())
         return aMenu;
     }
 
@@ -104,9 +110,9 @@ export default class Table implements IHasProvider<Mesh>, IHasUpdate, IHasMenu {
         this._provider.material = this.getMaterial()
         this._provider.geometry = this.getGeometry()
     }
-    
+
     public getRaio() {
-        return this._controls.Raio / this._controls.Potencia 
+        return this._controls.Raio / this._controls.Potencia
     }
 
     public getCenters(): IVertexConfig[] {
@@ -116,60 +122,50 @@ export default class Table implements IHasProvider<Mesh>, IHasUpdate, IHasMenu {
 
         const modePair = this._controls.Potencia % 2;
 
-        let offsetIsPair = 0;
-        if (this._controls['Potencia'] % 2 == 0) {
-            offsetIsPair = this.getRaio();
-        } else {
-            const offsetIsPair = 0;
-        }
+
+        const getConfigVertex = (x: number, y: number): IVertexConfig => {
+            const getOffsetPair = () => this._controls.Potencia % 2 == 0 ? this.getRaio() : 0;
+            const isActive = (ownX: number, ownY: number) => {
+                if ( !this._controls['Modo Tabuleiro'] )
+                    return true;
+
+                if ( this._controls.Potencia % 2 == 0 ) {
+                    return Math.abs(ownX + y) % 2 == (ownX * ownY >= 0 ? 1 : 0);
+                } else {
+                       return (ownX + ownY) % 2 == 0;
+                }
+                return true;
+            }
+
+            const offsetVertexX = x == 0 ? 0 : (Math.abs(x)/x * -1);
+            const offsetVertexY = y == 0 ? 0 : (Math.abs(y)/y * -1);
+            return {
+                aVertex: new Vector2(
+                    offSetCircle * x + (offsetVertexX * getOffsetPair()),
+                    offSetCircle * y + (offsetVertexY * getOffsetPair()),
+                    ),
+                isActive: isActive(x, y)
+            }
+        };
 
         for (let aPhaseX = 0; aPhaseX < Math.floor(this._controls.Potencia / 2) ; aPhaseX++) {
             if (modePair == 1) {
-                centers.push({
-                    aVertex: new Vector2(offSetCircle * (aPhaseX + 1) - offsetIsPair, 0),
-                    isActive: (aPhaseX + 1) % 2 == modePair
-                })
-                centers.push({
-                    aVertex: new Vector2(-offSetCircle * (aPhaseX + 1) + offsetIsPair, 0),
-                    isActive: (aPhaseX + 1) % 2 == modePair
-                })
-                centers.push({
-                    aVertex: new Vector2(0, -offSetCircle * (aPhaseX + 1) + offsetIsPair),
-                    isActive: (aPhaseX + 1) % 2 == modePair
-                })
-
-                centers.push({
-                    aVertex: new Vector2(0, offSetCircle * (aPhaseX + 1) - offsetIsPair),
-                    isActive: (aPhaseX + 1) % 2 == 1
-                })
+                centers.push(getConfigVertex(aPhaseX + 1, 0))
+                centers.push(getConfigVertex(-(aPhaseX + 1), 0))
+                centers.push(getConfigVertex(0, aPhaseX + 1))
+                centers.push(getConfigVertex(0, -(aPhaseX + 1)))
             }
 
             for (let aPhaseY = 0; aPhaseY < Math.floor(this._controls.Potencia / 2) ; aPhaseY++) {
-                centers.push({
-                    aVertex: new Vector2(offSetCircle * (aPhaseX + 1) - offsetIsPair, offSetCircle * (aPhaseY + 1) - offsetIsPair),
-                    isActive: (aPhaseX + 1 + aPhaseY + 1) % 2 == modePair
-                })
-
-                centers.push({
-                    aVertex: new Vector2(offSetCircle * (aPhaseX + 1) - offsetIsPair, -offSetCircle * (aPhaseY + 1) + offsetIsPair),
-                    isActive: (aPhaseX + 1 + aPhaseY + 1) % 2 == modePair
-                })
-                centers.push({
-                    aVertex: new Vector2(-offSetCircle * (aPhaseX + 1) + offsetIsPair, -offSetCircle * (aPhaseY + 1) + offsetIsPair),
-                    isActive: (aPhaseX + 1 + aPhaseY + 1) % 2 == modePair
-                })
-                centers.push({
-                    aVertex: new Vector2(-offSetCircle * (aPhaseX + 1) + offsetIsPair, offSetCircle * (aPhaseY + 1) - offsetIsPair),
-                    isActive: (aPhaseX + 1 + aPhaseY + 1) % 2 == 0
-                })
+                centers.push(getConfigVertex((aPhaseX + 1), (aPhaseY + 1)))
+                centers.push(getConfigVertex(-(aPhaseX + 1), (aPhaseY + 1)))
+                centers.push(getConfigVertex(-(aPhaseX + 1), -(aPhaseY + 1)))
+                centers.push(getConfigVertex((aPhaseX + 1), -(aPhaseY + 1)))
             }
         }
 
         if (this._controls.Potencia % 2 == 1) {
-            centers.push({
-                aVertex: new Vector2(0, 0),
-                    isActive: true
-            })
+            centers.push(getConfigVertex(0, 0));
         }
 
         return centers;
