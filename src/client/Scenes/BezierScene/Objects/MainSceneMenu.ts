@@ -7,7 +7,7 @@ export default class MainSceneMenu implements IHasProvider<GUI> {
 
     protected _provider: GUI;
 
-    protected _title: string = "Malha";
+    protected _title: string = "Curva";
     constructor(aMenu: IHasProvider<GUI>) {
         this._provider = aMenu.getProvider().addFolder(this._title)
         this._provider.hide();

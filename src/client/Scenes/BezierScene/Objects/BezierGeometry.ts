@@ -13,8 +13,6 @@ export default class BezierGeometry implements IHasProvider<Line>, IHasUpdate, I
 
     protected _provider: Line;
 
-    protected _controls = {}
-
     protected _vectors: Array<Vector3> = [];
 
     constructor() {

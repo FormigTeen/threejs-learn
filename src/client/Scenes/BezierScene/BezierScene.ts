@@ -19,8 +19,12 @@ export default class BezierScene implements IScene, IHasMenu, IHasUpdate {
     protected _bezer: BezierGeometry;
     protected _simple: SimpleGeometry;
     protected _teta: number = 0.0;
-    protected _scale = 8;
-    protected _amplitude = 10;
+
+    protected _controls = {
+        Velocidade: 0.01,
+        Escala: 8,
+        Amplitude: 10,
+    }
 
 
     public constructor() {
@@ -46,6 +50,9 @@ export default class BezierScene implements IScene, IHasMenu, IHasUpdate {
     onMenu(aMenu: IHasProvider<GUI>): IHasProvider<GUI> {
         if ( !this._menu ) {
             this._menu = new MainSceneMenu(aMenu);
+            this._menu.getProvider().add(this._controls, 'Velocidade', 0.01, 0.1).onChange(() => this._teta = 0)
+            this._menu.getProvider().add(this._controls, 'Escala', 1, 10).onChange(() => this._teta = 0)
+            this._menu.getProvider().add(this._controls, 'Amplitude', 0, 35).onChange(() => this._teta = 0)
             this._camera.onMenu(this._menu)
         }
         return this._menu;
@@ -56,7 +63,7 @@ export default class BezierScene implements IScene, IHasMenu, IHasUpdate {
     }
 
     onUpdate(): unknown {
-        this._teta += 0.01;
+        this._teta += this._controls.Velocidade;
         this._bezer.setVectors(this.getVectors()).onUpdate()
         this._simple.setVectors(this.getVectors()).onUpdate()
         return this
@@ -76,10 +83,10 @@ export default class BezierScene implements IScene, IHasMenu, IHasUpdate {
 
     getVectors() {
         return [
-            new Vector3( this._scale * -1.0, this._amplitude * Math.sin(0) / 2.0,0.0),
-            new Vector3( this._scale * -0.5, this._amplitude * Math.sin(Math.PI/2.0 + this._teta) / 2.0, 0.0),
-            new Vector3(  this._scale * 0.5, this._amplitude * Math.sin(3.0*Math.PI/2.0 + this._teta) / 2.0, 0.0),
-            new Vector3(  this._scale * 1.0, this._amplitude * Math.sin(Math.PI) / 2.0, 0.0)
+            new Vector3( this._controls.Escala * -1.0, this._controls.Amplitude * Math.sin(0) / 2.0,0.0),
+            new Vector3( this._controls.Escala * -0.5, this._controls.Amplitude * Math.sin(Math.PI/2.0 + this._teta) / 2.0, 0.0),
+            new Vector3(  this._controls.Escala * 0.5, this._controls.Amplitude * Math.sin(3.0*Math.PI/2.0 + this._teta) / 2.0, 0.0),
+            new Vector3(  this._controls.Escala * 1.0, this._controls.Amplitude * Math.sin(Math.PI) / 2.0, 0.0)
         ];
     }
 
