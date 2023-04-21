@@ -1,10 +1,13 @@
 import { OrthographicCamera, PerspectiveCamera, Scene, WebGLRenderer } from 'three'
 import * as THREE from 'three'
 import { IHasProvider } from './Interfaces/IHasProvider'
-import { IHasUpdate } from './Interfaces/IHasUpdate'
-import IHasMenu from './Interfaces/IHasMenu'
+import {IHasUpdate, isHasUpdate} from './Interfaces/IHasUpdate'
+import IHasMenu, {isHasMenu} from './Interfaces/IHasMenu'
 import { Controller, GUI } from 'lil-gui'
 import IScene from './Interfaces/IScene'
+import Menu from "./Objects/Menu";
+import {max} from "three/examples/jsm/nodes/shadernode/ShaderNodeBaseElements";
+import {AsciiEffect} from "three/examples/jsm/effects/AsciiEffect";
 
 interface ConfigUpdate {
     getApplication(): Application,
@@ -16,6 +19,7 @@ export default class Application implements IHasMenu {
     protected _provider: WebGLRenderer;
     protected _scene?: IScene
     protected _scenes: Array<IScene> = [];
+    protected _menu?: Menu
 
     protected _sceneOption? : Controller;
 
@@ -49,6 +53,9 @@ export default class Application implements IHasMenu {
     }
 
     addScene(aScene: IScene) {
+        if ( isHasMenu(aScene) && this._menu ) {
+            aScene.onMenu(this._menu)
+        }
         this._scenes = [
             ...this._scenes,
             aScene
@@ -57,6 +64,9 @@ export default class Application implements IHasMenu {
             this._controls.Cena = aScene.getProvider().name;
             this.onChangeScene()
             this._controls.BackupCena = this._controls.Cena;
+        }
+        if ( isHasUpdate(aScene) ) {
+            this.registerUpdate(aScene)
         }
         return this;
     }
@@ -113,6 +123,19 @@ export default class Application implements IHasMenu {
         this._scenes.find(_ => _.getProvider().name === this._controls['BackupCena'])?.onUnload(this)
         this._controls.BackupCena = this._controls.Cena;
         this._scenes.find(_ => _.getProvider().name === this._controls['Cena'])?.onLoad(this)
+    }
+
+    public useMenu()
+    {
+        if ( !this._menu )
+            this._menu = new Menu();
+        return this
+    }
+
+    public onFuncMenu(aCallable: (aMenu: Menu, aApp: Application) => unknown) {
+        if ( this._menu )
+            aCallable(this._menu, this)
+        return this
     }
 
 

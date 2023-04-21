@@ -9,23 +9,20 @@ import IScene from '../../Interfaces/IScene'
 import Application from '../../Application'
 import Camera from './Objects/Camera'
 
-export default class GroundScene implements IScene, IHasMenu, IHasUpdate {
+export default class BezierScene implements IScene, IHasMenu, IHasUpdate {
 
     protected _provider: Scene;
     protected _menu?: MainSceneMenu;
     protected _camera: Camera;
 
-    protected _ground: Ground;
 
     public constructor() {
 
         this._provider = new Scene();
-        this._provider.name = "Malha";
+        this._provider.name = "Bezier";
         this._camera = new Camera()
 
 
-        this._ground = new Ground();
-        this._provider.add(this._ground.getProvider())
     }
 
     public getProvider()
@@ -36,7 +33,6 @@ export default class GroundScene implements IScene, IHasMenu, IHasUpdate {
     onMenu(aMenu: IHasProvider<GUI>): IHasProvider<GUI> {
         if ( !this._menu ) {
             this._menu = new MainSceneMenu(aMenu);
-            this._ground.onMenu(this._menu)
             this._camera.onMenu(this._menu)
         }
         return this._menu;
@@ -47,7 +43,7 @@ export default class GroundScene implements IScene, IHasMenu, IHasUpdate {
     }
 
     onUpdate(): unknown {
-        return this._ground.onUpdate();
+        return this
     }
 
     onUnload() {
