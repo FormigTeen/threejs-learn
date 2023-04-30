@@ -61,6 +61,7 @@ export default class BezierShader implements IHasProvider<Line>, IHasUpdate, IHa
 
     onUpdate() {
         this._provider.geometry = this.getGeometry()
+        this._provider.material = this.getMaterial()
         return this;
     }
 
