@@ -3,13 +3,13 @@ import { IHasProvider } from '../../Interfaces/IHasProvider'
 import IHasMenu from '../../Interfaces/IHasMenu'
 import MainSceneMenu from './Objects/MainSceneMenu'
 import { GUI } from 'lil-gui'
-import Ground from './Objects/BezierGeometry'
 import { IHasUpdate } from '../../Interfaces/IHasUpdate'
 import IScene from '../../Interfaces/IScene'
 import Application from '../../Application'
 import Camera from './Objects/Camera'
 import BezierGeometry from "./Objects/BezierGeometry";
 import SimpleGeometry from "./Objects/SimpleGeometry";
+import BezierShader from "./Objects/BezierShader/BezierShader";
 
 export default class BezierScene implements IScene, IHasMenu, IHasUpdate {
 
@@ -18,6 +18,7 @@ export default class BezierScene implements IScene, IHasMenu, IHasUpdate {
     protected _camera: Camera;
     protected _bezer: BezierGeometry;
     protected _simple: SimpleGeometry;
+    protected _shader: BezierShader;
     protected _teta: number = 0.0;
 
     protected _controls = {
@@ -34,10 +35,13 @@ export default class BezierScene implements IScene, IHasMenu, IHasUpdate {
         this._camera = new Camera()
         this._bezer = new BezierGeometry();
         this._simple = new SimpleGeometry();
+        this._shader = new BezierShader();
         this._bezer.setVectors(this.getVectors())
         this._simple.setVectors(this.getVectors())
-        this._provider.add(this._bezer.getProvider());
-        this._provider.add(this._simple.getProvider());
+        this._shader.setVectors(this.getVectors())
+        //this._provider.add(this._bezer.getProvider());
+        //this._provider.add(this._simple.getProvider());
+        this._provider.add(this._shader.getProvider())
 
 
     }
@@ -54,6 +58,7 @@ export default class BezierScene implements IScene, IHasMenu, IHasUpdate {
             this._menu.getProvider().add(this._controls, 'Escala', 1, 10).onChange(() => this._teta = 0)
             this._menu.getProvider().add(this._controls, 'Amplitude', 0, 35).onChange(() => this._teta = 0)
             this._camera.onMenu(this._menu)
+            this._shader.onMenu(this._menu)
         }
         return this._menu;
     }
@@ -66,6 +71,7 @@ export default class BezierScene implements IScene, IHasMenu, IHasUpdate {
         this._teta += this._controls.Velocidade;
         this._bezer.setVectors(this.getVectors()).onUpdate()
         this._simple.setVectors(this.getVectors()).onUpdate()
+        this._shader.setVectors(this.getVectors()).onUpdate()
         return this
     }
 
