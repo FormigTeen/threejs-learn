@@ -33,11 +33,32 @@ export default class BezierShader implements IHasProvider<Line>, IHasUpdate, IHa
 
     protected getGeometry()
     {
-        return new BufferGeometry().setFromPoints(this.getVectors())
+        return new BufferGeometry().setFromPoints(this.getVertices())
     }
 
     getVectors() {
-        return this._vectors
+        return this._vectors.map(_ => _.clone()).map(_ => {
+            _.y = _.y * -1;
+            return _;
+        })
+    }
+
+    getVertices(quantity: number = 20) {
+        const groupVertices = [...Array(quantity + 1).keys()]
+            .map(_ => [
+                this.getVector(this.getVectors()[0], this.getVectors()[1]).multiplyScalar(_ / quantity).add(this.getVectors()[0]),
+                this.getVector(this.getVectors()[1], this.getVectors()[2]).multiplyScalar(_ / quantity).add(this.getVectors()[1]),
+                this.getVector(this.getVectors()[2], this.getVectors()[3]).multiplyScalar(_ / quantity).add(this.getVectors()[2])
+            ])
+        return [
+            ...groupVertices.map(_ => _[0]),
+            ...groupVertices.map(_ => _[1]),
+            ...groupVertices.map(_ => _[2]),
+        ];
+    }
+
+    getVector(origin: Vector3, end: Vector3) {
+        return end.clone().sub(origin)
     }
     protected getMaterial()
     {

@@ -33,7 +33,7 @@ float getBezierSimple(int number, int knumber, float position) {
 	if ( number == 1 )
 		return 3.0 * position * pow(1.0 - position, 2.0);
 	if ( number == 2 )
-		return 3.0 * pow(position, 2.0) * 1.0 - position;
+		return 3.0 * pow(position, 2.0) * (1.0 - position);
 	if ( number == 3 )
 		return pow(position, 3.0);
 
@@ -44,8 +44,6 @@ vec2 getPosition(vec2 aVertex) {
 	vec2 result = vec2(0.0, 0.0);
 	float uPosition = findPath(aVertex);
 	float bezierResult = 0.0;
-	if ( uPosition >= 0.5 )
-		return aVertex;
 	for ( int i = 0 ; i < LIMIT ; i++ ) {
 		bezierResult = getBezierSimple(i, LIMIT - 1, uPosition);
 		result.x += (bezierResult * controls[i].x);

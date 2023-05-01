@@ -39,8 +39,8 @@ export default class BezierScene implements IScene, IHasMenu, IHasUpdate {
         this._bezer.setVectors(this.getVectors())
         this._simple.setVectors(this.getVectors())
         this._shader.setVectors(this.getVectors())
-        //this._provider.add(this._bezer.getProvider());
-        //this._provider.add(this._simple.getProvider());
+        this._provider.add(this._bezer.getProvider());
+        this._provider.add(this._simple.getProvider());
         this._provider.add(this._shader.getProvider())
 
 
