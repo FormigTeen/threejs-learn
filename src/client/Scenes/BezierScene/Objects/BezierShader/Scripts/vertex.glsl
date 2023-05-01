@@ -1,7 +1,7 @@
 #define LIMIT 4
 varying vec2 aVertex;
 
-varying float time;
+varying float uPosition;
 
 uniform vec2 controls[LIMIT];
 
@@ -42,7 +42,6 @@ float getBezierSimple(int number, int knumber, float position) {
 
 vec2 getPosition(vec2 aVertex) {
 	vec2 result = vec2(0.0, 0.0);
-	float uPosition = findPath(aVertex);
 	float bezierResult = 0.0;
 	for ( int i = 0 ; i < LIMIT ; i++ ) {
 		bezierResult = getBezierSimple(i, LIMIT - 1, uPosition);
@@ -56,5 +55,6 @@ vec2 getPosition(vec2 aVertex) {
 
 void main(void) {
 	aVertex = position.xy;
+	uPosition = findPath(aVertex);
 	gl_Position = projectionMatrix * modelViewMatrix * vec4(getPosition(aVertex), 0.0, 1.0);
 }
