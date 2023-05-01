@@ -7,22 +7,28 @@ varying float uPosition;
 
 varying vec2 aVertex;
 
-
-int toStep() {
-	return int(floor(uPosition / (1.0 / 8.0)));
+float getSteepSize() {
+	return 1.0 / 8.0;
 }
 
-float getMaxOnStep(int number)
-{
-	return (1.0 / 8.0) * float(number);
+
+float getSteep(int steep) {
+	return getSteepSize() * float(steep);
+}
+
+float getReference(int steep) {
+	return uPosition / getSteep(steep);
 }
 
 vec3 getColor() {
-	if ( toStep() == 1 ) {
-		return vec3(1.0, 0.0, 0.0);
+	if ( uPosition <= getSteep(1)) {
+		return vec3(1.0, 0.0, 0.0) * (1.0 - getReference(1)) + vec3(1.0, 0.5, 0.0) * getReference(1);
 	}
-	return vec3(1.0, 1.0, 0.0);
-	return vec3(1.0, 1.0, 0.0);
+	if ( uPosition <= getSteep(2)) {
+		if ( getReference(2) > 1.0 )
+			return vec3(1.0, 0.5, 0.0) * (1.0 - getReference(2)) + vec3(1.0, 1.0, 0.0) * getReference(2);
+	}
+	return vec3(0.0, 0.0, 1.0);
 }
 
 void main(void) {
