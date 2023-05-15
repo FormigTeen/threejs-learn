@@ -9,8 +9,9 @@ import Menu from './Objects/Menu'
 import Sun from "./Objects/Sun";
 import Earth from "./Objects/Earth";
 import Moon from "./Objects/Moon";
+import {IHasUpdate} from "../../Interfaces/IHasUpdate";
 
-export default class SolarScene implements IScene, IHasMenu {
+export default class SolarScene implements IScene, IHasMenu, IHasUpdate {
 
     protected _provider: Scene;
 
@@ -60,6 +61,17 @@ export default class SolarScene implements IScene, IHasMenu {
             this._camera.onMenu(this._menu)
         }
         return this._menu;
+    }
+
+    onUpdate(): unknown {
+        this._sun.onUpdate()
+        this._earth.onUpdate()
+        this._moon.onUpdate()
+        return this
+    }
+
+    getUuid(): string {
+        return this._provider.uuid
     }
 
 }
