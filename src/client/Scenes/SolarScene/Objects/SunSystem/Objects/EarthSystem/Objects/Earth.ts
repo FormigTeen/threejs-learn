@@ -4,10 +4,10 @@ import {
     MeshBasicMaterial, Object3D,
     SphereGeometry, Vector3,
 } from 'three'
-import { IHasProvider } from '../../../../../Interfaces/IHasProvider'
-import { IHasUpdate } from '../../../../../Interfaces/IHasUpdate'
-import IHasMenu from '../../../../../Interfaces/IHasMenu'
-import Menu from '../../Menu'
+import { IHasProvider } from '../../../../../../../Interfaces/IHasProvider'
+import { IHasUpdate } from '../../../../../../../Interfaces/IHasUpdate'
+import IHasMenu from '../../../../../../../Interfaces/IHasMenu'
+import Menu from '../../../../Menu'
 
 export default class Earth implements IHasProvider<Object3D>, IHasUpdate, IHasMenu {
 

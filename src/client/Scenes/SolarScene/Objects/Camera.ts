@@ -11,7 +11,7 @@ export default class Camera implements IHasProvider<OrthographicCamera>, IHasMen
 
     public constructor() {
         const aspect = window.innerWidth / window.innerHeight;
-        this._provider = new OrthographicCamera( this._size * aspect / -2.0, this._size * aspect / 2.0, this._size / 2.0, this._size / -2.0, -25.0, 25.0);
+        this._provider = new OrthographicCamera( this._size * aspect / -2.0, this._size * aspect / 2.0, this._size / 2.0, this._size / -2.0, -10000, 10000);
         this._provider.updateProjectionMatrix();
         window.addEventListener('resize', () => this.onResize(), false)
     }

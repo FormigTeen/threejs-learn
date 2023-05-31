@@ -6,18 +6,16 @@ import IHasMenu from '../../Interfaces/IHasMenu'
 import { IHasProvider } from '../../Interfaces/IHasProvider'
 import { GUI } from 'lil-gui'
 import Menu from './Objects/Menu'
-import Sun from "./Objects/Sun";
-import Earth from "./Objects/EarthSystem/Objects/Earth";
-import Moon from "./Objects/EarthSystem/Objects/Moon";
+import Sun from "./Objects/SunSystem/Objects/Sun";
 import {IHasUpdate} from "../../Interfaces/IHasUpdate";
-import EarthSystem from "./Objects/EarthSystem/EarthSystem";
+import EarthSystem from "./Objects/SunSystem/Objects/EarthSystem/EarthSystem";
+import SunSystem from "./Objects/SunSystem/SunSystem";
 
 export default class SolarScene implements IScene, IHasMenu, IHasUpdate {
 
     protected _provider: Scene;
 
-    protected _sun: Sun;
-    protected _systemEarth: EarthSystem;
+    protected _sunSystem: SunSystem;
 
     protected _camera: Camera;
 
@@ -27,11 +25,9 @@ export default class SolarScene implements IScene, IHasMenu, IHasUpdate {
         this._provider = new Scene();
         this._provider.name = "Sistema Solar"
 
-        this._sun = new Sun();
-        this._systemEarth = new EarthSystem();
+        this._sunSystem = new SunSystem();
 
-        this._provider.add(this._sun.getProvider())
-        this._provider.add(this._systemEarth.getProvider())
+        this._provider.add(this._sunSystem.getProvider())
 
         this._camera = new Camera()
     }
@@ -62,8 +58,7 @@ export default class SolarScene implements IScene, IHasMenu, IHasUpdate {
     }
 
     onUpdate(): unknown {
-        this._sun.onUpdate()
-        this._systemEarth.onUpdate()
+        this._sunSystem.onUpdate()
         return this
     }
 
