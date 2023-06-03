@@ -3,6 +3,7 @@ import BezierScene from './Scenes/BezierScene/BezierScene'
 import Application from './Application'
 import ScenesMenu from './Objects/ScenesMenu'
 import SolarScene from "./Scenes/SolarScene/SolarScene";
+import TravelScene from "./Scenes/TravelScene/TravelScene";
 
 
 
@@ -11,6 +12,6 @@ import SolarScene from "./Scenes/SolarScene/SolarScene";
     //.addScene(new BezierScene())
     //.addScene(new TableScene())
     //.addScene(new GroundScene())
-    .addScene(new SolarScene())
+    .addScene(new TravelScene())
     .onFuncMenu((_, anApp) => anApp.onMenu(new ScenesMenu(_)))
     .onBoot()

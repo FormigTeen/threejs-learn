@@ -5,6 +5,17 @@ module.exports = {
     module: {
         rules: [
             {
+                test: /\.gltf$/,
+                loader: 'gltf-loader',
+                exclude: /node_modules/,
+            },
+            {
+                test: /\.(bin|jpe?g|png)$/,
+                loader: 'file-loader',
+                options: { esModule: false },
+                exclude: /node_modules/,
+            },
+            {
                 test: /\.tsx?$/,
                 use: 'ts-loader',
                 exclude: /node_modules/,
@@ -25,5 +36,6 @@ module.exports = {
     output: {
         filename: 'bundle.js',
         path: path.resolve(__dirname, '../../dist/client'),
+        publicPath: path.resolve(__dirname, '../../dist/assets'),
     }
 };
