@@ -16,9 +16,14 @@ import {OrbitControls} from "three/examples/jsm/controls/OrbitControls";
 export default class TravelScene implements IScene, IHasMenu, IHasUpdate {
 
     protected _provider: Scene;
+    protected _modelScene?: Object3D;
     protected _menu?: MainSceneMenu;
     protected _camera: Camera;
     protected _loader: GLTFLoader;
+    protected _inputs = {
+        'Position X': 0,
+        'Position Y': 0
+    };
     protected _controls: OrbitControls;
 
     public constructor() {
@@ -30,22 +35,26 @@ export default class TravelScene implements IScene, IHasMenu, IHasUpdate {
         this._controls = new OrbitControls(this._camera.getProvider(), document.body);
         this._controls.autoRotate = false;
         this._loader.load(KingModel, _ => {
+            this._modelScene = _.scene;
             this._provider.add(_.scene)
-            const obj = _.scene;
-            const helper= new BoxHelper(obj);
 
+            const helper= new BoxHelper(_.scene);
             helper.geometry.computeBoundingBox();
+            this._modelScene.add(helper)
 
             const max = helper.geometry.boundingBox?.max;
             const min = helper.geometry.boundingBox?.min;
+            const aCenter = new Vector3();
+            helper.geometry.boundingBox?.getCenter(aCenter);
+            this._modelScene.position.setX(0 - aCenter.x)
+            this._modelScene.position.setZ(0 - aCenter.z)
+            console.log(aCenter.x, aCenter.y, aCenter.z)
+
             if ( max && min ) {
                 this._camera.getProvider().position.x = max.x;
                 this._camera.getProvider().position.y = max.y;
                 this._camera.getProvider().position.z = max.z;
                 this._camera.getProvider().lookAt(new Vector3(0.0, 0.0, 0.0));
-                const farPlane = Math.max(	(max.x - min.x),
-                    (max.y - min.y),
-                    (max.z - min.z) );
 
                 this._camera.getProvider().far 	= 1000000;
                 this._camera.getProvider().updateProjectionMatrix();
@@ -56,7 +65,9 @@ export default class TravelScene implements IScene, IHasMenu, IHasUpdate {
                     max.y*1.2,
                     max.z*1.2);
                 this._provider.add(pointLight1);
-                var globalAxis = new AxesHelper	( Math.max(	(max.x - min.x),
+                var globalAxis = new AxesHelper	(
+                    Math.max(
+                        (max.x - min.x),
                         (max.y - min.y),
                         (max.z - min.z)
                     )
@@ -76,7 +87,20 @@ export default class TravelScene implements IScene, IHasMenu, IHasUpdate {
             this._menu = new MainSceneMenu(aMenu);
             this._camera.onMenu(this._menu)
         }
+        aMenu.getProvider().add(this._inputs, 'Position X', 0.1, 20.0).onChange(
+            () => this.onChange()
+        )
+        aMenu.getProvider().add(this._inputs, 'Position Y', 0.1, 20.0).onChange(
+            () => this.onChange()
+        )
         return this._menu;
+    }
+
+    onChange() {
+        if ( this._modelScene ) {
+            this._modelScene.position.setX(this._inputs["Position X"])
+            this._modelScene.position.setY(this._inputs["Position Y"])
+        }
     }
 
     getUuid(): string {
