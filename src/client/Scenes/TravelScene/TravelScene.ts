@@ -10,28 +10,33 @@ import Camera from './Objects/Camera'
 import {GLTFLoader} from "three/examples/jsm/loaders/GLTFLoader";
 // @ts-ignore
 import KingModel from './Objects/King/scene.gltf';
-import {bool, vec3} from "three/examples/jsm/nodes/shadernode/ShaderNodeBaseElements";
 import {OrbitControls} from "three/examples/jsm/controls/OrbitControls";
-import {FirstPersonControls} from "three/examples/jsm/controls/FirstPersonControls";
 import {FlyControls} from "three/examples/jsm/controls/FlyControls";
 
 export default class TravelScene implements IScene, IHasMenu, IHasUpdate {
 
+    protected _camLoader?: Application;
     protected _provider: Scene;
     protected _modelScene?: Object3D;
     protected _menu?: MainSceneMenu;
+
     protected _droneCamera: Camera;
     protected _personCamera: Camera;
+    protected _firstCamera: Camera;
+    protected _secondCamera: Camera;
+    protected _thirtyCamera: Camera;
+
     protected _loader: GLTFLoader;
     protected _light?: AmbientLight;
     protected _group: Object3D;
     protected _inputs = {
-        'Position X': 0,
-        'Position Y': 0,
-        'Position Z': 0
+        'Camera': 'Camera 1',
     };
     protected _droneControls: OrbitControls;
     protected _personControls: FlyControls;
+
+    protected _boxLimit?: BoxHelper;
+    protected _camLimit?: BoxHelper;
 
     public constructor() {
 
@@ -41,7 +46,7 @@ export default class TravelScene implements IScene, IHasMenu, IHasUpdate {
 
         this._droneCamera = new Camera()
         this._droneControls = new OrbitControls(this._droneCamera.getProvider(), document.body);
-        this._droneControls.listenToKeyEvents(window)
+        this._droneControls.listenToKeyEvents(window.document.body)
         this._droneControls.autoRotate = false;
 
         this._personCamera = new Camera()
@@ -49,23 +54,41 @@ export default class TravelScene implements IScene, IHasMenu, IHasUpdate {
         this._personControls.movementSpeed = 0.25
         this._personControls.dragToLook = true
 
+        this._secondCamera = new Camera()
+        this._secondCamera.getProvider().lookAt(new Vector3(0, 0, 0))
+
+        this._thirtyCamera = new Camera()
+        this._thirtyCamera.getProvider().lookAt(new Vector3(100, 0, 50))
+        this._thirtyCamera.getProvider().position.set(-5, 0, 20)
+
+        this._firstCamera = new Camera()
+        this._firstCamera.getProvider().lookAt(new Vector3(10, 0, 50))
+        this._firstCamera.getProvider().position.set(-5, 10, 10)
+
         this._group = new Object3D();
         this._provider.add(this._group);
 
         this._loader.load(KingModel, _ => {
 
             this._modelScene = _.scene;
-            const helper= new BoxHelper(this._modelScene);
-            helper.geometry.computeBoundingBox();
-            _.scene.add(helper)
+            this._boxLimit = new BoxHelper(this._modelScene);
+            _.scene.add(this._boxLimit)
+            this._boxLimit.geometry.computeBoundingBox();
 
             this._group.add(this._modelScene)
             this._group.scale.set(10, 10, 10);
 
-            const max = helper.geometry.boundingBox?.max;
-            const min = helper.geometry.boundingBox?.min;
+            this._boxLimit.geometry.computeBoundingBox();
+            this._boxLimit.update();
+
+            this._camLimit = new BoxHelper(this._group)
+            this._camLimit.geometry.computeBoundingBox()
+            this._camLimit.update()
+
+            const max = this._boxLimit.geometry.boundingBox?.max;
+            const min = this._boxLimit.geometry.boundingBox?.min;
             const aCenter = new Vector3();
-            helper.geometry.boundingBox?.getCenter(aCenter);
+            this._boxLimit.geometry.boundingBox?.getCenter(aCenter);
 
             this._modelScene.position.setX(0 - aCenter.x)
             this._modelScene.position.setZ(0 - aCenter.z)
@@ -89,7 +112,7 @@ export default class TravelScene implements IScene, IHasMenu, IHasUpdate {
                 this._light = new AmbientLight(new Color(1.0, 1.0, 1.0));
 
                 const aCenterLight = new Vector3();
-                helper.geometry.boundingBox?.getCenter(aCenter);
+                this._boxLimit.geometry.boundingBox?.getCenter(aCenter);
                 this._light.position.set(
                     aCenterLight.x, aCenterLight.y, aCenterLight.z
                 );
@@ -114,23 +137,29 @@ export default class TravelScene implements IScene, IHasMenu, IHasUpdate {
             this._droneCamera.onMenu(this._menu)
             this._personCamera.onMenu(this._menu);
         }
-        aMenu.getProvider().add(this._inputs, 'Position X', 0.1, 20.0).onChange(
-            () => this.onChange()
-        )
-        aMenu.getProvider().add(this._inputs, 'Position Y', 0.1, 20.0).onChange(
-            () => this.onChange()
-        )
-        aMenu.getProvider().add(this._inputs, 'Position Z', 0.1, 20.0).onChange(
+        aMenu.getProvider().add(this._inputs, 'Camera', ['Drone', 'Pessoa', 'Camera 1', 'Camera 2', 'Camera 3']).onChange(
             () => this.onChange()
         )
         return this._menu;
     }
 
     onChange() {
-        if ( this._light ) {
-            this._light.position.setX(this._inputs["Position X"])
-            this._light.position.setY(this._inputs["Position Y"])
-            this._light.position.setZ(this._inputs["Position Z"])
+        if ( this._camLoader ) {
+            if (this._inputs.Camera === "Drone") {
+                this._camLoader.setCamera(this._droneCamera)
+            }
+            if (this._inputs.Camera == "Pessoa") {
+                this._camLoader.setCamera(this._personCamera)
+            }
+            if (this._inputs.Camera == "Camera 1") {
+                this._camLoader.setCamera(this._firstCamera)
+            }
+            if (this._inputs.Camera == "Camera 2") {
+                this._camLoader.setCamera(this._secondCamera)
+            }
+            if (this._inputs.Camera == "Camera 3") {
+                this._camLoader.setCamera(this._thirtyCamera)
+            }
         }
     }
 
@@ -142,6 +171,7 @@ export default class TravelScene implements IScene, IHasMenu, IHasUpdate {
         this._droneControls.update()
         this._personControls.update(getClock() % 5)
         this._personCamera.getProvider().position.setY(0);
+
         return this
     }
 
@@ -152,9 +182,11 @@ export default class TravelScene implements IScene, IHasMenu, IHasUpdate {
 
     onLoad(aLoader: unknown) {
         this._menu?.getProvider().show();
-        if ( aLoader instanceof Application )
-            //aLoader.setCamera(this._droneCamera)
-            aLoader.setCamera(this._personCamera)
+        if ( aLoader instanceof Application ) {
+            this._camLoader = aLoader
+            this._camLoader.setCamera(this._firstCamera)
+        }
+
         return this;
     }
 
