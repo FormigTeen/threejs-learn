@@ -10,7 +10,7 @@ import Camera from './Objects/Camera'
 import {GLTFLoader} from "three/examples/jsm/loaders/GLTFLoader";
 // @ts-ignore
 import KingModel from './Objects/King/scene.gltf';
-import {bool} from "three/examples/jsm/nodes/shadernode/ShaderNodeBaseElements";
+import {bool, vec3} from "three/examples/jsm/nodes/shadernode/ShaderNodeBaseElements";
 import {OrbitControls} from "three/examples/jsm/controls/OrbitControls";
 
 export default class TravelScene implements IScene, IHasMenu, IHasUpdate {
@@ -20,9 +20,12 @@ export default class TravelScene implements IScene, IHasMenu, IHasUpdate {
     protected _menu?: MainSceneMenu;
     protected _camera: Camera;
     protected _loader: GLTFLoader;
+    protected _light?: PointLight;
+    protected _group: Object3D;
     protected _inputs = {
         'Position X': 0,
-        'Position Y': 0
+        'Position Y': 0,
+        'Position Z': 0
     };
     protected _controls: OrbitControls;
 
@@ -33,14 +36,19 @@ export default class TravelScene implements IScene, IHasMenu, IHasUpdate {
         this._loader = new GLTFLoader()
         this._camera = new Camera()
         this._controls = new OrbitControls(this._camera.getProvider(), document.body);
+        this._controls.listenToKeyEvents(window)
         this._controls.autoRotate = false;
+        this._group = new Object3D();
+        this._provider.add(this._group);
         this._loader.load(KingModel, _ => {
             this._modelScene = _.scene;
-            this._provider.add(_.scene)
+            this._group.add(_.scene)
 
             const helper= new BoxHelper(_.scene);
             helper.geometry.computeBoundingBox();
             this._modelScene.add(helper)
+
+            this._group.scale.set(10, 10, 10);
 
             const max = helper.geometry.boundingBox?.max;
             const min = helper.geometry.boundingBox?.min;
@@ -48,7 +56,6 @@ export default class TravelScene implements IScene, IHasMenu, IHasUpdate {
             helper.geometry.boundingBox?.getCenter(aCenter);
             this._modelScene.position.setX(0 - aCenter.x)
             this._modelScene.position.setZ(0 - aCenter.z)
-            console.log(aCenter.x, aCenter.y, aCenter.z)
 
             if ( max && min ) {
                 this._camera.getProvider().position.x = max.x;
@@ -59,18 +66,18 @@ export default class TravelScene implements IScene, IHasMenu, IHasUpdate {
                 this._camera.getProvider().far 	= 1000000;
                 this._camera.getProvider().updateProjectionMatrix();
                 this._controls.update();
-                const pointLight1 = new PointLight(new Color(1.0, 1.0, 1.0));
-                pointLight1.distance = 0.0;
-                pointLight1.position.set(	max.x*1.2,
-                    max.y*1.2,
-                    max.z*1.2);
-                this._provider.add(pointLight1);
+                this._light = new PointLight(new Color(1.0, 1.0, 1.0));
+                this._light.distance = 100.0;
+
+                const aCenterLight = new Vector3();
+                helper.geometry.boundingBox?.getCenter(aCenter);
+                this._light.position.set(
+                    aCenterLight.x, aCenterLight.y, aCenterLight.z
+                );
+
+                this._provider.add(this._light);
                 var globalAxis = new AxesHelper	(
-                    Math.max(
-                        (max.x - min.x),
-                        (max.y - min.y),
-                        (max.z - min.z)
-                    )
+                    1000
                 );
                 this._provider.add(globalAxis);
             }
@@ -93,13 +100,17 @@ export default class TravelScene implements IScene, IHasMenu, IHasUpdate {
         aMenu.getProvider().add(this._inputs, 'Position Y', 0.1, 20.0).onChange(
             () => this.onChange()
         )
+        aMenu.getProvider().add(this._inputs, 'Position Z', 0.1, 20.0).onChange(
+            () => this.onChange()
+        )
         return this._menu;
     }
 
     onChange() {
-        if ( this._modelScene ) {
-            this._modelScene.position.setX(this._inputs["Position X"])
-            this._modelScene.position.setY(this._inputs["Position Y"])
+        if ( this._light ) {
+            this._light.position.setX(this._inputs["Position X"])
+            this._light.position.setY(this._inputs["Position Y"])
+            this._light.position.setZ(this._inputs["Position Z"])
         }
     }
 
