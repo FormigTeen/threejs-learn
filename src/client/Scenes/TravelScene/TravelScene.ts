@@ -1,9 +1,9 @@
-import {AxesHelper, BoxHelper, Color, Group, Object3D, PointLight, Scene, Vector3} from 'three'
+import {AmbientLight, AxesHelper, BoxHelper, Color, Group, Object3D, PointLight, Scene, Vector3} from 'three'
 import { IHasProvider } from '../../Interfaces/IHasProvider'
 import IHasMenu from '../../Interfaces/IHasMenu'
 import MainSceneMenu from './Objects/MainSceneMenu'
 import { GUI } from 'lil-gui'
-import { IHasUpdate } from '../../Interfaces/IHasUpdate'
+import {IHasUpdate, IUpdateProp} from '../../Interfaces/IHasUpdate'
 import IScene from '../../Interfaces/IScene'
 import Application from '../../Application'
 import Camera from './Objects/Camera'
@@ -12,62 +12,81 @@ import {GLTFLoader} from "three/examples/jsm/loaders/GLTFLoader";
 import KingModel from './Objects/King/scene.gltf';
 import {bool, vec3} from "three/examples/jsm/nodes/shadernode/ShaderNodeBaseElements";
 import {OrbitControls} from "three/examples/jsm/controls/OrbitControls";
+import {FirstPersonControls} from "three/examples/jsm/controls/FirstPersonControls";
+import {FlyControls} from "three/examples/jsm/controls/FlyControls";
 
 export default class TravelScene implements IScene, IHasMenu, IHasUpdate {
 
     protected _provider: Scene;
     protected _modelScene?: Object3D;
     protected _menu?: MainSceneMenu;
-    protected _camera: Camera;
+    protected _droneCamera: Camera;
+    protected _personCamera: Camera;
     protected _loader: GLTFLoader;
-    protected _light?: PointLight;
+    protected _light?: AmbientLight;
     protected _group: Object3D;
     protected _inputs = {
         'Position X': 0,
         'Position Y': 0,
         'Position Z': 0
     };
-    protected _controls: OrbitControls;
+    protected _droneControls: OrbitControls;
+    protected _personControls: FlyControls;
 
     public constructor() {
 
         this._provider = new Scene();
         this._provider.name = "Travel";
         this._loader = new GLTFLoader()
-        this._camera = new Camera()
-        this._controls = new OrbitControls(this._camera.getProvider(), document.body);
-        this._controls.listenToKeyEvents(window)
-        this._controls.autoRotate = false;
+
+        this._droneCamera = new Camera()
+        this._droneControls = new OrbitControls(this._droneCamera.getProvider(), document.body);
+        this._droneControls.listenToKeyEvents(window)
+        this._droneControls.autoRotate = false;
+
+        this._personCamera = new Camera()
+        this._personControls = new FlyControls(this._personCamera.getProvider(), document.body);
+        this._personControls.movementSpeed = 0.25
+        this._personControls.dragToLook = true
+
         this._group = new Object3D();
         this._provider.add(this._group);
+
         this._loader.load(KingModel, _ => {
+
             this._modelScene = _.scene;
-            this._group.add(_.scene)
-
-            const helper= new BoxHelper(_.scene);
+            const helper= new BoxHelper(this._modelScene);
             helper.geometry.computeBoundingBox();
-            this._modelScene.add(helper)
+            _.scene.add(helper)
 
+            this._group.add(this._modelScene)
             this._group.scale.set(10, 10, 10);
 
             const max = helper.geometry.boundingBox?.max;
             const min = helper.geometry.boundingBox?.min;
             const aCenter = new Vector3();
             helper.geometry.boundingBox?.getCenter(aCenter);
+
             this._modelScene.position.setX(0 - aCenter.x)
             this._modelScene.position.setZ(0 - aCenter.z)
 
             if ( max && min ) {
-                this._camera.getProvider().position.x = max.x;
-                this._camera.getProvider().position.y = max.y;
-                this._camera.getProvider().position.z = max.z;
-                this._camera.getProvider().lookAt(new Vector3(0.0, 0.0, 0.0));
+                this._droneCamera.getProvider().position.set(max.x, max.y, max.z);
+                this._droneCamera.getProvider().lookAt(new Vector3(0.0, 0.0, 0.0));
 
-                this._camera.getProvider().far 	= 1000000;
-                this._camera.getProvider().updateProjectionMatrix();
-                this._controls.update();
-                this._light = new PointLight(new Color(1.0, 1.0, 1.0));
-                this._light.distance = 100.0;
+                this._personCamera.getProvider().position.set(max.x, max.y, max.z);
+                this._personCamera.getProvider().lookAt(new Vector3(0.0, 0.0, 0.0));
+
+                this._droneCamera.getProvider().far = 1000000;
+                this._personCamera.getProvider().far = 1000000;
+
+                this._droneCamera.getProvider().updateProjectionMatrix();
+                this._personCamera.getProvider().updateProjectionMatrix();
+
+                this._droneControls.update();
+                this._personControls.update(0);
+
+                this._light = new AmbientLight(new Color(1.0, 1.0, 1.0));
 
                 const aCenterLight = new Vector3();
                 helper.geometry.boundingBox?.getCenter(aCenter);
@@ -92,7 +111,8 @@ export default class TravelScene implements IScene, IHasMenu, IHasUpdate {
     onMenu(aMenu: IHasProvider<GUI>): IHasProvider<GUI> {
         if ( !this._menu ) {
             this._menu = new MainSceneMenu(aMenu);
-            this._camera.onMenu(this._menu)
+            this._droneCamera.onMenu(this._menu)
+            this._personCamera.onMenu(this._menu);
         }
         aMenu.getProvider().add(this._inputs, 'Position X', 0.1, 20.0).onChange(
             () => this.onChange()
@@ -118,8 +138,10 @@ export default class TravelScene implements IScene, IHasMenu, IHasUpdate {
         return this.getProvider().uuid;
     }
 
-    onUpdate(): unknown {
-        this._controls.update()
+    onUpdate({ getClock }: IUpdateProp): unknown {
+        this._droneControls.update()
+        this._personControls.update(getClock() % 5)
+        this._personCamera.getProvider().position.setY(0);
         return this
     }
 
@@ -131,7 +153,8 @@ export default class TravelScene implements IScene, IHasMenu, IHasUpdate {
     onLoad(aLoader: unknown) {
         this._menu?.getProvider().show();
         if ( aLoader instanceof Application )
-            aLoader.setCamera(this._camera)
+            //aLoader.setCamera(this._droneCamera)
+            aLoader.setCamera(this._personCamera)
         return this;
     }
 

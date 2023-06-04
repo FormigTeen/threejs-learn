@@ -1,7 +1,7 @@
 import { OrthographicCamera, PerspectiveCamera, Scene, WebGLRenderer } from 'three'
 import * as THREE from 'three'
 import { IHasProvider } from './Interfaces/IHasProvider'
-import {IHasUpdate, isHasUpdate} from './Interfaces/IHasUpdate'
+import {IHasUpdate, isHasUpdate, IUpdateProp} from './Interfaces/IHasUpdate'
 import IHasMenu, {isHasMenu} from './Interfaces/IHasMenu'
 import { Controller, GUI } from 'lil-gui'
 import IScene from './Interfaces/IScene'
@@ -91,7 +91,7 @@ export default class Application implements IHasMenu {
         const key = aObject.getUuid()
         this._updatesStack = {
             ...this._updatesStack,
-            [key]: () => aObject.onUpdate()
+            [key]: (_: IUpdateProp) => aObject.onUpdate(_)
         }
         return this;
     }
