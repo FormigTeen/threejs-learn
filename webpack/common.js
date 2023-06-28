@@ -15,6 +15,7 @@ import {
   models,
   glsl,
 } from './modules';
+import { publicPath } from './../package.json';
 
 /**
  * Entry point for the bundle.
@@ -25,7 +26,7 @@ const entry = [`${paths.src}/index.ts`, `${paths.src}/css/styles.css`];
  * Set output file name and path.
  */
 const output = {
-  publicPath: '/',
+  publicPath: config.IS_DEV ? '/' : publicPath ?? '/',
   path: paths.dist,
   filename: config.JS_FILE_OUTPUT,
 };
