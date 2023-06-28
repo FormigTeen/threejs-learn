@@ -4,7 +4,7 @@
   "homepage": "https://formigteen.github.io/threejs-learn",
   "description": "A starter template/boilerplate built with TypeScript/JavaScript, Babel, Webpack 5, PostCSS, Jest, ESLint, and Stylelint.",
   "main": "",
-  "url": "URL",
+  "url": "https://formigteen.github.io/threejs-learn",
   "target": "web",
   "private": false,
   "license": "MIT",
